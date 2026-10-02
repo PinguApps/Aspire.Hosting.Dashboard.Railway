@@ -1,5 +1,5 @@
 param(
-    [string] $CoreCommit = "PENDING_CORE_COMMIT",
+    [string] $CoreCommit = "f13d47673f0fbc01608ba3c62edf8b580e891d6f",
     [string] $Configuration = "Release"
 )
 
@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 
 if ($CoreCommit -notmatch '^[a-f0-9]{40}$') {
-    throw "CoreCommit must be the reviewed immutable Railway source commit."
+    throw "CoreCommit must be the pinned immutable Railway source commit."
 }
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -26,7 +26,9 @@ foreach ($target in @($dependencyRoot, $packageFeed)) {
 
 git -C $dependencyRoot init --quiet | Write-Host
 if ($LASTEXITCODE -ne 0) { throw "Railway source checkout initialization failed." }
-git -C $dependencyRoot fetch --depth 1 https://github.com/PinguApps/Aspire.Hosting.Railway.git $CoreCommit | Write-Host
+git -C $dependencyRoot remote add origin https://github.com/PinguApps/Aspire.Hosting.Railway.git
+if ($LASTEXITCODE -ne 0) { throw "Railway source remote initialization failed." }
+git -C $dependencyRoot fetch --depth 1 origin $CoreCommit | Write-Host
 if ($LASTEXITCODE -ne 0) { throw "Pinned Railway source fetch failed." }
 git -C $dependencyRoot checkout --detach FETCH_HEAD | Write-Host
 if ($LASTEXITCODE -ne 0) { throw "Pinned Railway checkout failed." }

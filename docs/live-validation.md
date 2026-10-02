@@ -24,3 +24,5 @@ Verified:
 The probe is a test utility: an immutable official .NET SDK container compiles small external test source at startup because the available GitHub credential cannot push GHCR packages. Production examples use release images already retained by PIN-647. All provisioning still uses `aspire deploy` and the shared publisher.
 
 Tokens and temporary consumer files remain outside the repository. Custom-domain DNS is an operator responsibility; the live test uses Railway's generated HTTPS domain. Shared provider contract tests cover domain and ownership permutations.
+
+Authenticated external Chrome verified all three telemetry types: Structured logs with PIN646_DASHBOARD_LOG_MARKER, child trace pin646-dashboard-live-trace, and the pin646.dashboard.probe.requests metric graph. The normal local Aspire dashboard started successfully while the extra resource remained NotStarted; no duplicate dashboard container ran.
