@@ -6,7 +6,7 @@
 | --- | --- |
 | ServiceName | Defaults to resource name; recorded identity protects against accidental renames. |
 | OwnershipMode / ExistingServiceId | Shared provider creation/adoption policy; explicit ID is required for unmarked adoption. |
-| Image | Tested immutable Aspire 13.6 Linux amd 64 image digest; replacement must also be immutable. |
+| Image | Tested immutable Aspire 13.6 Linux amd64 image digest; replacement must also be immutable. |
 | Region | Shared provider Railway region identifier. |
 | CustomDomain | Frontend HTTPS custom domain; operator configures DNS. |
 | MemoryGB / VCpus | Optional provider resource limits. |
