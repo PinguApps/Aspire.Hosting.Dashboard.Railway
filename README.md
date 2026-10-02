@@ -6,18 +6,24 @@ Deploy an optional authenticated standalone Aspire dashboard to Railway through 
 using Aspire.Hosting.Dashboard.Railway;
 using Aspire.Hosting.Railway;
 
-var target = builder.AddRailwayTarget("railway",
-    builder.AddParameter("railway-project-id"),
-    builder.AddParameter("railway-environment-id"),
-    builder.AddParameter("railway-token", secret: true),
-    builder.AddParameter("site-key"));
-var dashboard = builder.AddRailwayDashboard("diagnostics",
-    builder.AddParameter("dashboard-browser-token", secret: true),
-    builder.AddParameter("dashboard-otlp-key", secret: true))
-    .PublishToRailway(target);
-builder.AddProject<Projects.Web>("web")
-    .WithRailwayDashboard(dashboard)
-    .PublishToRailway(target, options => options.Image = retainedImageDigest);
+var web = builder.AddProject<Projects.Web>("web");
+if (builder.ExecutionContext.IsPublishMode)
+{
+    var target = builder.AddRailwayTarget("railway",
+        builder.AddParameter("railway-project-id", Current("Parameters__railway-project-id")),
+        builder.AddParameter("railway-environment-id", Current("Parameters__railway-environment-id")),
+        builder.AddParameter("railway-token", Current("Parameters__railway-token"), secret: true),
+        builder.AddParameter("site-key", Current("Parameters__site-key")));
+    var dashboard = builder.AddRailwayDashboard("diagnostics",
+        builder.AddParameter("dashboard-browser-token", Current("Parameters__dashboard-browser-token"), secret: true),
+        builder.AddParameter("dashboard-otlp-key", Current("Parameters__dashboard-otlp-key"), secret: true))
+        .PublishToRailway(target);
+    web.WithRailwayDashboard(dashboard)
+        .PublishToRailway(target, options => options.Image = retainedImageDigest);
+}
+
+static string Current(string name) => Environment.GetEnvironmentVariable(name)
+    ?? throw new InvalidOperationException($"Missing deployment input: {name}");
 ```
 
 Supply two separate randomly generated secrets, each at least 32 characters. The OTLP key uses URL-safe letters, digits, hyphens and underscores. Log in by entering the browser token into the UI; deployment outputs never include a token-bearing login URL.

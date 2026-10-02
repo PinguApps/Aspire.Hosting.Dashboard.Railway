@@ -1,18 +1,20 @@
 import { createBuilder } from "./.aspire/modules/aspire.mjs";
 const builder = await createBuilder();
-const project = await builder.addParameter("railway-project-id");
-const environment = await builder.addParameter("railway-environment-id");
-const token = await builder.addParameter("railway-token", { secret: true });
-const site = await builder.addParameter("site-key");
-const browser = await builder.addParameter("dashboard-browser-token", { secret: true });
-const otlp = await builder.addParameter("dashboard-otlp-key", { secret: true });
-const target = await builder.addRailwayTarget("railway", project, environment, token, site);
-let dashboard = await builder.addRailwayDashboard("diagnostics", browser, otlp);
-dashboard = await dashboard.publishToRailway(target, { serviceName: "diagnostics", region: "europe-west4", memoryGB: 1, vCpus: 1, deploymentTimeoutSeconds: 600 });
-const frontendUrl = await dashboard.getRailwayDashboardUrl();
-void frontendUrl;
 let worker = await builder.addContainer("worker", "ghcr.io/example/site-worker");
-worker = await worker.withRailwayDashboard(dashboard);
-worker = await worker.publishToRailway(target, { image: "ghcr.io/example/site-worker@sha256:" + "a".repeat(64) });
+if (await builder.executionContext().isPublishMode()) {
+  const project = await builder.addParameter("railway-project-id", { value: process.env["Parameters__railway-project-id"] });
+  const environment = await builder.addParameter("railway-environment-id", { value: process.env["Parameters__railway-environment-id"] });
+  const token = await builder.addParameter("railway-token", { value: process.env["Parameters__railway-token"], secret: true });
+  const site = await builder.addParameter("site-key", { value: process.env["Parameters__site-key"] });
+  const browser = await builder.addParameter("dashboard-browser-token", { value: process.env["Parameters__dashboard-browser-token"], secret: true });
+  const otlp = await builder.addParameter("dashboard-otlp-key", { value: process.env["Parameters__dashboard-otlp-key"], secret: true });
+  const target = await builder.addRailwayTarget("railway", project, environment, token, site);
+  let dashboard = await builder.addRailwayDashboard("diagnostics", browser, otlp);
+  dashboard = await dashboard.publishToRailway(target, { serviceName: "diagnostics", region: "europe-west4", memoryGB: 1, vCpus: 1, deploymentTimeoutSeconds: 600 });
+  const frontendUrl = await dashboard.getRailwayDashboardUrl();
+  void frontendUrl;
+  worker = await worker.withRailwayDashboard(dashboard);
+  worker = await worker.publishToRailway(target, { image: "ghcr.io/example/site-worker@sha256:" + "a".repeat(64) });
+}
 const app = await builder.build();
 await app.run();

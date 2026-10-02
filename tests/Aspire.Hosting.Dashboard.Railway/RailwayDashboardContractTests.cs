@@ -9,6 +9,15 @@ namespace PinguApps.Aspire.Hosting.Dashboard.Railway.Tests;
 /// <summary>Local and publish-time dashboard contracts.</summary>
 public sealed class RailwayDashboardContractTests
 {
+    /// <summary>The documented local sample requires no deployment parameters.</summary>
+    [Fact]
+    public void LocalSampleDeclaresOnlyItsWorkload()
+    {
+        IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder();
+        Samples.RailwayDashboardAppHostSnippets.Configure(builder);
+        Assert.IsType<ContainerResource>(Assert.Single(builder.Resources));
+    }
+
     /// <summary>Credentials must remain explicit, secret and separate.</summary>
     [Fact]
     public void CredentialsRequireDistinctSecretParameters()
