@@ -1,0 +1,22 @@
+{
+  "sdk": {
+    "version": "13.6.0"
+  },
+  "Parameters": {
+    "railway-token": "fixture-token",
+    "site-key": "fixture-site",
+    "dashboard-otlp-key": "fixture-otlp-secret-0123456789abcdef",
+    "railway-project-id": "fixture-project",
+    "dashboard-browser-token": "fixture-browser-secret-0123456789abcdef",
+    "railway-environment-id": "fixture-environment"
+  },
+  "packages": {
+    "PinguApps.Aspire.Hosting.Dashboard.Railway": "../../../../src/Aspire.Hosting.Dashboard.Railway/Aspire.Hosting.Dashboard.Railway.csproj",
+    "PinguApps.Aspire.Hosting.Railway": "1.0.0"
+  },
+  "appHost": {
+    "path": "apphost.mts",
+    "language": "typescript/nodejs"
+  },
+  "channel": "stable"
+}
