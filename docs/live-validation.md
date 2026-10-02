@@ -26,3 +26,5 @@ The probe is a test utility: an immutable official .NET SDK container compiles s
 Tokens and temporary consumer files remain outside the repository. Custom-domain DNS is an operator responsibility; the live test uses Railway's generated HTTPS domain. Shared provider contract tests cover domain and ownership permutations.
 
 Authenticated external Chrome verified all three telemetry types: Structured logs with PIN646_DASHBOARD_LOG_MARKER, child trace pin646-dashboard-live-trace, and the pin646.dashboard.probe.requests metric graph. The normal local Aspire dashboard started successfully while the extra resource remained NotStarted; no duplicate dashboard container ran.
+
+A second external packed-NuGet TypeScript AppHost completed actual aspire deploy successfully against the same existing service; its callback-free DTO preserved image defaults and private secret references, reused the current deployment, and exported the token-free frontend URL. Supply TypeScript runtime parameter values through Parameters__ environment variables; the fixture's Parameters object is only placeholder documentation.
