@@ -1,5 +1,5 @@
 param(
-    [string] $CoreCommit = "71c2f0339340f53ec8900a0c16e586c66cc5d645",
+    [string] $CoreCommit = "5547a196c626ad018db8d651ac2bbca34314b8d5",
     [string] $Configuration = "Release"
 )
 
