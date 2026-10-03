@@ -1,5 +1,7 @@
 # PinguApps.Aspire.Hosting.Dashboard.Railway
 
+[![PinguApps.Aspire.Hosting.Dashboard.Railway version](https://img.shields.io/nuget/v/PinguApps.Aspire.Hosting.Dashboard.Railway?style=for-the-badge&label=PinguApps.Aspire.Hosting.Dashboard.Railway)](https://www.nuget.org/packages/PinguApps.Aspire.Hosting.Dashboard.Railway/) [![PinguApps.Aspire.Hosting.Dashboard.Railway downloads](https://img.shields.io/nuget/dt/PinguApps.Aspire.Hosting.Dashboard.Railway?style=for-the-badge&label=downloads)](https://www.nuget.org/packages/PinguApps.Aspire.Hosting.Dashboard.Railway/)
+
 Deploy an optional authenticated standalone Aspire dashboard to Railway through `aspire deploy`. Workloads send logs, traces and metrics over private Railway networking. The normal local Aspire dashboard remains unchanged.
 
 ```csharp
