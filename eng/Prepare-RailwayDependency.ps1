@@ -35,7 +35,8 @@ if ($LASTEXITCODE -ne 0) { throw "Pinned Railway checkout failed." }
 $checkedOut = (git -C $dependencyRoot rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0 -or $checkedOut -ne $CoreCommit) { throw "Railway source identity mismatch." }
 
-dotnet pack (Join-Path $dependencyRoot "src/Aspire.Hosting.Railway/Aspire.Hosting.Railway.csproj") -c $Configuration -p:Version=1.0.0 -o $packageFeed | Write-Host
+# Apply this repository's central pins, including the patched MessagePack transitive dependency.
+dotnet pack (Join-Path $dependencyRoot "src/Aspire.Hosting.Railway/Aspire.Hosting.Railway.csproj") -c $Configuration -p:Version=1.0.0 "-p:DirectoryPackagesPropsPath=$(Join-Path $repoRoot 'Directory.Packages.props')" -o $packageFeed | Write-Host
 if ($LASTEXITCODE -ne 0) { throw "Pinned Railway source packaging failed." }
 if (-not (Test-Path -LiteralPath (Join-Path $packageFeed "PinguApps.Aspire.Hosting.Railway.1.0.0.nupkg"))) {
     throw "Railway dependency package was not produced."
