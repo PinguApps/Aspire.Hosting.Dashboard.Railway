@@ -32,7 +32,7 @@ Supply two separate randomly generated secrets, each at least 32 characters. The
 
 This is a short-lived diagnostic viewer, not the durable shared OpenObserve service. It receives telemetry only: no production resource list, console-log stream, or remote AppHost controls. One replica, no persistent volume, no sleeping. Data is disposable across redeployments.
 
-Target Aspire 13.6.0/.NET 10. Install `PinguApps.Aspire.Hosting.Dashboard.Railway`1.0.0 and the shared `PinguApps.Aspire.Hosting.Railway`1.0.0 provider. TypeScript AppHosts list both explicitly:
+Target Aspire 13.6.4/.NET 10. Install `PinguApps.Aspire.Hosting.Dashboard.Railway`1.0.0 and the shared `PinguApps.Aspire.Hosting.Railway`1.0.0 provider. TypeScript AppHosts list both explicitly:
 
 ```json
 "packages": {
