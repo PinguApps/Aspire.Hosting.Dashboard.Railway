@@ -65,6 +65,6 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Frontend uses BrowserToken authentication. Ingestion uses a separate API key over Railway private networking. Only frontend 18888 receives a public HTTPS domain.
 - Telemetry API is disabled. In Aspire 13.6, MCP accesses telemetry through that API rather than a separate dashboard endpoint.
 - Startup logging must suppress the token-bearing login URL. Outputs are token-free service URLs and identities.
-- Target Aspire version: `13.6.4`.
+- Target Aspire version: `13.6.5`.
 - Match build/analyzer/workflow conventions from the reference extensions. Packaged TypeScript fixture must pass before publication.
 - Tests and docs must describe shipped behaviour, including short-lived diagnostic data and the absence of remote AppHost resource controls.
