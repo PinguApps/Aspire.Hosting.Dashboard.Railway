@@ -53,8 +53,8 @@ $baseline = $packageVersions["Aspire.Hosting"]
 if ([string]::IsNullOrWhiteSpace($baseline)) {
   throw "Missing Aspire.Hosting baseline in Directory.Packages.props."
 }
-
-
+Add-Pin -Path "Directory.Packages.props" -Name "Aspire.Hosting.Dotnet" -Version $packageVersions["Aspire.Hosting.Dotnet"]
+$coreVersion = $packageVersions["PinguApps.Aspire.Hosting.Railway"]
 $typeScriptConfigPaths = @(
   "samples/TypeScriptAppHost/aspire.config.json",
   "tests/Aspire.Hosting.Dashboard.Railway/Fixtures/TypeScriptAppHost/aspire.config.json"
@@ -63,6 +63,12 @@ $typeScriptConfigPaths = @(
 foreach ($path in $typeScriptConfigPaths) {
   $config = Get-Content -Raw -Path (Join-Path $repoRoot $path) | ConvertFrom-Json
   Add-Pin -Path $path -Name "sdk.version" -Version $config.sdk.version
+  if ($config.packages.'PinguApps.Aspire.Hosting.Railway' -ne $coreVersion) {
+    throw "Railway core pin drift in $path."
+  }
+  if ($path.StartsWith("tests/")) {
+    Add-Pin -Path $path -Name "Aspire.Hosting.Dotnet" -Version $config.packages.'Aspire.Hosting.Dotnet'
+  }
 }
 
 $workflowPaths = @(
@@ -76,6 +82,9 @@ foreach ($path in $workflowPaths) {
 }
 
 Add-RegexPin -Path "AGENTS.md" -Name "Target Aspire version" -Pattern 'Target Aspire version:\s*`(?<version>[^`]+)`'
+foreach ($path in "README.md", "docs/install.md", "docs/getting-started-typescript.md") {
+  Add-RegexPin -Path $path -Name "Documented Aspire version" -Pattern '(?:Aspire |set `sdk\.version` to )(?<version>\d+\.\d+\.\d+)(?=[ /.,]|$)'
+}
 
 $driftedPins = $pins | Where-Object { $_.Version -ne $baseline }
 

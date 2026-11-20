@@ -1,6 +1,7 @@
 import { createBuilder } from "./.aspire/modules/aspire.mjs";
 const builder = await createBuilder();
 let worker = await builder.addContainer("worker", "ghcr.io/example/site-worker");
+let dotnetWorker = await builder.addDotnetProject("dotnet-worker", "./Fixture.cs");
 if (await builder.executionContext().isPublishMode()) {
   const project = await builder.addParameter("railway-project-id", { value: process.env["Parameters__railway-project-id"] });
   const environment = await builder.addParameter("railway-environment-id", { value: process.env["Parameters__railway-environment-id"] });
@@ -14,7 +15,10 @@ if (await builder.executionContext().isPublishMode()) {
   const frontendUrl = await dashboard.getRailwayDashboardUrl();
   void frontendUrl;
   worker = await worker.withRailwayDashboard(dashboard);
-  worker = await worker.publishToRailway(target, { image: "ghcr.io/example/site-worker@sha256:" + "a".repeat(64) });
+  const image = "ghcr.io/example/site-worker@sha256:" + "a".repeat(64);
+  worker = await worker.publishToRailway(target, { image });
+  dotnetWorker = await dotnetWorker.withRailwayDashboard(dashboard);
+  dotnetWorker = await dotnetWorker.publishToRailway(target, { image });
 }
 const app = await builder.build();
 await app.run();

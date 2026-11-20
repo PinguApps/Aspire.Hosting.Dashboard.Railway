@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Steps\**\*.cs" />
+    <Compile Remove="Steps\**\*.cs;Fixtures/TypeScriptAppHost/Fixture.cs" />
     <None Remove="Features\**\*.feature" />
     <ReqnrollFeatureFiles Remove="Features\**\*.feature" />
   </ItemGroup>
