@@ -1,6 +1,6 @@
 {
   "sdk": {
-    "version": "13.6.5"
+    "version": "17.0.0"
   },
   "Parameters": {
     "railway-token": "fixture-token",
@@ -11,8 +11,8 @@
     "railway-environment-id": "fixture-environment"
   },
   "packages": {
-    "PinguApps.Aspire.Hosting.Railway": "1.0.0",
-    "PinguApps.Aspire.Hosting.Dashboard.Railway": "1.0.0"
+    "PinguApps.Aspire.Hosting.Railway": "1.1.5",
+    "PinguApps.Aspire.Hosting.Dashboard.Railway": "1.0.5"
   },
   "appHost": {
     "path": "apphost.mts",

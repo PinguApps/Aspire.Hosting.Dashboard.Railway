@@ -1,11 +1,11 @@
 param(
     [string] $Configuration = "Release",
     [string] $PackageVersion = "9999.0.0",
-    [string] $RailwayDependencyFeed = $env:RAILWAY_DEPENDENCY_FEED
+    [string] $RailwayDependencyFeed = $env:RAILWAY_DEPENDENCY_FEED,
+    [switch] $RequirePublishedDependency
 )
 
 $ErrorActionPreference = "Stop"
-$PSNativeCommandUseErrorActionPreference = $true
 $PSNativeCommandUseErrorActionPreference = $true
 
 if ($PackageVersion -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$') {
@@ -31,31 +31,35 @@ $fixtureWork = Join-Path $artifactsRoot "fixture"
 $nugetPackages = Join-Path $artifactsRoot ".nuget-packages"
 $packageId = "PinguApps.Aspire.Hosting.Dashboard.Railway"
 
-if ([string]::IsNullOrWhiteSpace($RailwayDependencyFeed)) {
-    $RailwayDependencyFeed = & (Join-Path $PSScriptRoot "Prepare-RailwayDependency.ps1") -Configuration $Configuration
+if ($RequirePublishedDependency -and -not [string]::IsNullOrWhiteSpace($RailwayDependencyFeed)) {
+    throw "Release validation must use the published Railway provider."
+}
+
+$coreSource = ""
+$coreMapping = ""
+if (-not [string]::IsNullOrWhiteSpace($RailwayDependencyFeed)) {
+    $feed = [Security.SecurityElement]::Escape((Resolve-Path $RailwayDependencyFeed).Path)
+    $coreSource = '<add key="core-fixture" value="' + $feed + '" />'
+    $coreMapping = '<packageSource key="core-fixture"><package pattern="PinguApps.Aspire.Hosting.Railway" /></packageSource>'
 }
 
 Remove-ContainedDirectory -Path $artifactsRoot -Root (Join-Path $repoRoot "artifacts")
 New-Item $packageOutput -ItemType Directory -Force | Out-Null
 New-Item $nugetPackages -ItemType Directory -Force | Out-Null
 
-$restoreArguments = @("restore", $solutionPath)
-if ([string]::IsNullOrWhiteSpace($RailwayDependencyFeed)) { $RailwayDependencyFeed = & (Join-Path $PSScriptRoot "Prepare-RailwayDependency.ps1") -Configuration $Configuration }
-if (-not [string]::IsNullOrWhiteSpace($RailwayDependencyFeed)) {
-    $restoreConfig = Join-Path $artifactsRoot "NuGet.restore.Config"
-    "<configuration><packageSources><clear/><add key=`"local`" value=`"$RailwayDependencyFeed`"/><add key=`"nuget.org`" value=`"https://api.nuget.org/v3/index.json`"/></packageSources></configuration>" | Set-Content $restoreConfig
-    $restoreArguments += @("--configfile", $restoreConfig)
-}
-dotnet @restoreArguments
+$restoreConfig = Join-Path $artifactsRoot "NuGet.restore.Config"
+@"
+<configuration>
+  <packageSources><clear />$coreSource<add key="nuget.org" value="https://api.nuget.org/v3/index.json" /></packageSources>
+  <packageSourceMapping>$coreMapping<packageSource key="nuget.org"><package pattern="*" /></packageSource></packageSourceMapping>
+</configuration>
+"@ | Set-Content $restoreConfig
+dotnet restore $solutionPath --configfile $restoreConfig --packages $nugetPackages --no-cache
 if ($LASTEXITCODE -ne 0) { throw "Solution restore failed." }
 dotnet build $solutionPath -c $Configuration --no-restore -p:ContinuousIntegrationBuild=true
 if ($LASTEXITCODE -ne 0) { throw "Solution build failed." }
 dotnet pack $solutionPath -c $Configuration --no-build -p:Version=$PackageVersion -o $packageOutput
 if ($LASTEXITCODE -ne 0) { throw "Solution packaging failed." }
-if (-not [string]::IsNullOrWhiteSpace($RailwayDependencyFeed)) {
-    Copy-Item -LiteralPath (Join-Path $RailwayDependencyFeed "PinguApps.Aspire.Hosting.Railway.1.0.0.nupkg") -Destination $packageOutput
-}
-
 $packageFile = Join-Path $packageOutput "$packageId.$PackageVersion.nupkg"
 $packageCacheId = $packageId.ToLowerInvariant()
 $packageCachePath = Join-Path $nugetPackages "$packageCacheId/$PackageVersion"
@@ -78,19 +82,6 @@ Set-Content (Join-Path $packageCachePath "$packageCacheId.$PackageVersion.nupkg.
     source = (Resolve-Path $packageOutput).Path
 } | ConvertTo-Json | Set-Content (Join-Path $packageCachePath ".nupkg.metadata") -Encoding UTF8
 
-if (-not [string]::IsNullOrWhiteSpace($RailwayDependencyFeed)) {
-    $dependencyId = "pinguapps.aspire.hosting.railway"
-    $dependencyFile = Join-Path $packageOutput "PinguApps.Aspire.Hosting.Railway.1.0.0.nupkg"
-    $dependencyCache = Join-Path $nugetPackages "$dependencyId/1.0.0"
-    New-Item $dependencyCache -ItemType Directory -Force | Out-Null
-    [IO.Compression.ZipFile]::ExtractToDirectory($dependencyFile, $dependencyCache)
-    Copy-Item -LiteralPath $dependencyFile -Destination (Join-Path $dependencyCache "$dependencyId.1.0.0.nupkg")
-    $dependencyHash = [Convert]::ToBase64String([Security.Cryptography.SHA512]::HashData([IO.File]::ReadAllBytes($dependencyFile)))
-    Set-Content (Join-Path $dependencyCache "$dependencyId.1.0.0.nupkg.sha512") $dependencyHash -Encoding ASCII
-    [ordered]@{version = 2; contentHash = $dependencyHash; source = $packageOutput} | ConvertTo-Json |
-        Set-Content (Join-Path $dependencyCache ".nupkg.metadata") -Encoding UTF8
-}
-
 Copy-Item $fixtureSource $fixtureWork -Recurse
 Remove-ContainedDirectory -Path (Join-Path $fixtureWork ".aspire") -Root $artifactsRoot
 Remove-ContainedDirectory -Path (Join-Path $fixtureWork ".modules") -Root $artifactsRoot
@@ -101,19 +92,20 @@ $aspireConfig = Get-Content $aspireConfigPath -Raw | ConvertFrom-Json
 $aspireConfig.packages.$packageId = $PackageVersion
 $aspireConfig | ConvertTo-Json -Depth 10 | Set-Content $aspireConfigPath -Encoding UTF8
 
-$packageOutputFullPath = (Resolve-Path $packageOutput).Path
+$packageOutputFullPath = [Security.SecurityElement]::Escape((Resolve-Path $packageOutput).Path)
 @"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
     <clear />
+    $coreSource
     <add key="local-package-gate" value="$packageOutputFullPath" />
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
   </packageSources>
   <packageSourceMapping>
+    $coreMapping
     <packageSource key="local-package-gate">
       <package pattern="PinguApps.Aspire.Hosting.Dashboard.Railway" />
-      <package pattern="PinguApps.Aspire.Hosting.Railway" />
     </packageSource>
     <packageSource key="nuget.org">
       <package pattern="*" />
@@ -138,8 +130,12 @@ try {
     $deploymentSteps = aspire deploy --non-interactive --list-steps
     if ($LASTEXITCODE -ne 0) { throw "Aspire deployment pipeline inspection failed." }
     $deploymentSteps | Write-Output
-    if (($deploymentSteps -join "`n") -notmatch 'railway-deploy-diagnostics') {
+    $plan = $deploymentSteps -join "`n"
+    if ($plan -notmatch 'railway-deploy-diagnostics') {
         throw "The NuGet-backed fixture did not register the dashboard deployment."
+    }
+    if ($plan -notmatch 'railway-deploy-dotnet-worker\r?\n[^\r\n]*Depends on:[^\r\n]*railway-deploy-diagnostics') {
+        throw "The .NET workload did not depend on dashboard deployment."
     }
 }
 finally {

@@ -93,14 +93,19 @@ public sealed class RailwayDashboardContractTests
     }
 
     /// <summary>Workloads reference private outputs and a secret header rather than public ingestion.</summary>
-    [Fact]
-    public async Task PublishedWorkloadUsesPrivateAuthenticatedHttpProtobuf()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task PublishedWorkloadUsesPrivateAuthenticatedHttpProtobuf(bool dotnetProject)
     {
         IDistributedApplicationBuilder builder = CreatePublishBuilder();
         IResourceBuilder<RailwayDashboardResource> dashboard = builder.AddRailwayDashboard("dashboard",
             builder.AddParameter("browser", secret: true), builder.AddParameter("otlp", secret: true)).PublishToRailway(CreateTarget(builder));
-        IResourceBuilder<ContainerResource> workload = builder.AddContainer("worker", "image").WithRailwayDashboard(dashboard);
-        Dictionary<string, object> environment = await GetEnvironmentAsync(builder, workload.Resource);
+        string projectPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Aspire.Hosting.Dashboard.Railway.Tests.csproj"));
+        IResourceWithEnvironment workload = dotnetProject
+            ? builder.AddDotnetProject("worker", projectPath).WithDotnetProjectRailwayDashboard(dashboard).Resource
+            : builder.AddContainer("worker", "image").WithRailwayDashboard(dashboard).Resource;
+        Dictionary<string, object> environment = await GetEnvironmentAsync(builder, workload);
         Assert.Equal("http/protobuf", environment["OTEL_EXPORTER_OTLP_PROTOCOL"]);
         ReferenceExpression endpoint = Assert.IsType<ReferenceExpression>(environment["OTEL_EXPORTER_OTLP_ENDPOINT"]);
         Assert.Contains("railway.privateHostname", endpoint.ValueExpression, StringComparison.Ordinal);
@@ -108,7 +113,7 @@ public sealed class RailwayDashboardContractTests
         ReferenceExpression header = Assert.IsType<ReferenceExpression>(environment["OTEL_EXPORTER_OTLP_HEADERS"]);
         Assert.Contains("x-otlp-api-key=", header.ValueExpression, StringComparison.Ordinal);
         Assert.Same(dashboard.Resource.OtlpApiKey, Assert.Single(header.ValueProviders));
-        Assert.Contains(workload.Resource.Annotations.OfType<ResourceRelationshipAnnotation>(), relationship => relationship.Resource == dashboard.Resource && relationship.Type == "Reference");
+        Assert.Contains(workload.Annotations.OfType<ResourceRelationshipAnnotation>(), relationship => relationship.Resource == dashboard.Resource && relationship.Type == "Reference");
     }
 
     private static IDistributedApplicationBuilder CreatePublishBuilder() => DistributedApplication.CreateBuilder(new DistributedApplicationOptions

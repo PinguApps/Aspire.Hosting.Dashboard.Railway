@@ -1,6 +1,7 @@
 #pragma warning disable CA1708 // The analyzer treats distinct C# extension blocks as case-only duplicate members.
 
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Dotnet;
 using Aspire.Hosting.Railway;
 
 namespace Aspire.Hosting.Dashboard.Railway;
@@ -167,5 +168,14 @@ public static class RailwayDashboardBuilderExtensions
         /// <summary>Routes a project's telemetry to the dashboard.</summary>
         [AspireExport("pinguapps.railway.dashboard.project.reference", MethodName = "withRailwayDashboard")]
         public IResourceBuilder<ProjectResource> WithProjectRailwayDashboard(IResourceBuilder<RailwayDashboardResource> dashboard) => builder.WithRailwayDashboard(dashboard);
+    }
+
+    /// <summary>Exports path-based .NET project OTLP wiring to guest AppHosts.</summary>
+    extension(IResourceBuilder<DotnetProjectResource> builder)
+    {
+
+        /// <summary>Routes a project's telemetry to the dashboard.</summary>
+        [AspireExport("pinguapps.railway.dashboard.dotnetProject.reference", MethodName = "withRailwayDashboard")]
+        public IResourceBuilder<DotnetProjectResource> WithDotnetProjectRailwayDashboard(IResourceBuilder<RailwayDashboardResource> dashboard) => builder.WithRailwayDashboard(dashboard);
     }
 }
