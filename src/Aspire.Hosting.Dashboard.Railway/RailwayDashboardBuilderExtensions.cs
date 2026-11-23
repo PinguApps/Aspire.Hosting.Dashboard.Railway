@@ -26,8 +26,8 @@ public static class RailwayDashboardBuilderExtensions
             }
 
             return builder.AddResource(new RailwayDashboardResource(name, browserToken.Resource, otlpApiKey.Resource))
-                .WithImage("mcr.microsoft.com/dotnet/aspire-dashboard")
-                .WithImageSHA256("94f41463f93ff8f87257a9ae8681a190fcd73e8e10cb46884160a6a6a8321356")
+                .WithImage("mcr.microsoft.com/aspire/dashboard")
+                .WithImageSHA256("69b9b095610997cc2b5a3c265acd5c9f8d6b6b5040ef8cfdccc8a66efff0252d")
                 .WithExplicitStart().ExcludeFromManifest();
         }
     }
