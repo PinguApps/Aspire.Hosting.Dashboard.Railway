@@ -82,11 +82,11 @@
   "packageRules": [
     {
       "matchPackageNames": [
-        "Aspire.Cli",
-        "/^Aspire\\.Hosting(?:\\.|$)/"
+        "/^Aspire(?:\\.|$)/i",
+        "mcr.microsoft.com/aspire/dashboard",
+        "mcr.microsoft.com/dotnet/aspire-dashboard"
       ],
-      "groupName": "aspire monorepo",
-      "groupSlug": "aspire-monorepo"
+      "enabled": false
     }
   ]
 }

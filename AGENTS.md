@@ -63,7 +63,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Normal local Aspire dashboard and workload telemetry configuration remain unchanged. The extra standalone container is explicitly stopped locally.
 - Keep the shared Railway provider in PinguApps.Aspire.Hosting.Railway; this package only supplies dashboard configuration and workload OTLP wiring.
 - Frontend uses BrowserToken authentication. Ingestion uses a separate API key over Railway private networking. Only frontend 18888 receives a public HTTPS domain.
-- Telemetry API is disabled. In Aspire 13.6, MCP accesses telemetry through that API rather than a separate dashboard endpoint.
+- Telemetry API is disabled. MCP telemetry access requires that API.
 - Startup logging must suppress the token-bearing login URL. Outputs are token-free service URLs and identities.
 - Target Aspire version: `17.0.0`.
 - Match build/analyzer/workflow conventions from the reference extensions. Packaged TypeScript fixture must pass before publication.
