@@ -5,7 +5,7 @@ Before release publication:
 1. Enable the Blacksmith GitHub App/runner for this repository (`blacksmith-2vcpu-ubuntu-2404`), matching the reference extensions.
 2. Configure the `NUGET_USER` GitHub Actions secret with the NuGet.org publishing account name.
 3. Configure a NuGet.org trusted publisher for owner `PinguApps`, repository `Aspire.Hosting.Dashboard.Railway`, workflow `publish.yml`. Publishing uses `NuGet/login` OIDC; no long-lived NuGet API key is referenced.
-4. Publish `PinguApps.Aspire.Hosting.Railway` 1.1.5 before this dependent package. The initial publish is performed by the repository owner.
+4. Publish `PinguApps.Aspire.Hosting.Railway` 1.1.6 before this dependent package. The initial publish is performed by the repository owner.
 
 CI and release validation restore the published core dependency from NuGet.org. The release workflow pushes the dashboard package.
 
