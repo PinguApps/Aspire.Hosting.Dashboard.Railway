@@ -11,7 +11,7 @@
     "railway-environment-id": "fixture-environment"
   },
   "packages": {
-    "PinguApps.Aspire.Hosting.Railway": "1.1.6",
+    "PinguApps.Aspire.Hosting.Railway": "1.1.7",
     "PinguApps.Aspire.Hosting.Dashboard.Railway": "1.0.7"
   },
   "appHost": {
