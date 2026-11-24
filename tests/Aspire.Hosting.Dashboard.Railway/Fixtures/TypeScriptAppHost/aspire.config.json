@@ -13,7 +13,7 @@
   "packages": {
     "Aspire.Hosting.Dotnet": "17.0.0",
     "PinguApps.Aspire.Hosting.Dashboard.Railway": "../../../../src/Aspire.Hosting.Dashboard.Railway/Aspire.Hosting.Dashboard.Railway.csproj",
-    "PinguApps.Aspire.Hosting.Railway": "1.1.6"
+    "PinguApps.Aspire.Hosting.Railway": "1.1.7"
   },
   "appHost": {
     "path": "apphost.mts",
